@@ -1,0 +1,11 @@
+DROP DATABASE IF EXISTS CHIP_FRIDGE;
+CREATE DATABASE IF NOT EXISTS CHIP_FRIDGE;
+USE CHIP_FRIDGE;
+
+CREATE TABLE product (
+    sensor INT NOT NULL,
+    quantity INT NOT NULL,
+    expiration_date DATE NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
+    PRIMARY KEY (product_name)
+);
