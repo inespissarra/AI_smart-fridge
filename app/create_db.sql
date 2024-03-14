@@ -3,9 +3,10 @@ CREATE DATABASE IF NOT EXISTS CHIP_FRIDGE;
 USE CHIP_FRIDGE;
 
 CREATE TABLE product (
-    sensor INT NOT NULL,
+    id INT AUTO_INCREMENT,
+    sensor INT NOT NULL UNIQUE,
     quantity INT NOT NULL,
-    expiration_date DATE NOT NULL,
+    expiration_date DATE,
     product_name VARCHAR(255) NOT NULL,
-    PRIMARY KEY (product_name)
+    PRIMARY KEY (id)
 );
