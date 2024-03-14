@@ -18,8 +18,8 @@ import socket
 
 
 def connect_to_wifi():
-    SSID='HUAWEI P40'
-    KEY='123456789'
+    SSID='NOS-FFFC'
+    KEY='MRZ2Q2NH'
 
     print ("Trying to connect. Note this may take a while...")
     wlan = network.WLAN(network.STA_IF)
@@ -27,9 +27,10 @@ def connect_to_wifi():
     wlan.active(True)
     wlan.connect(SSID, KEY)
 
+
 def SendImage(img):
     s = socket.socket()
-    s.connect(("192.168.43.117", 8080))  # Replace with Raspberry Pi's IP address
+    s.connect(("192.168.1.254", 8080))  # Replace with Raspberry Pi's IP address
 
     # Convert image to JPEG
     img_compressed = img.compressed(quality=50)
@@ -42,6 +43,8 @@ def SendImage(img):
 
     # Close the socket
     s.close()
+
+connect_to_wifi()
 
 sensor.reset()  # Reset and initialize the sensor.
 sensor.set_pixformat(sensor.RGB565)  # Set pixel format to RGB565 (or GRAYSCALE)
