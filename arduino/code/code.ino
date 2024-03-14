@@ -17,14 +17,14 @@ void loop() {
     float Vout = (analogRead(A0)*5)/1023.0;
 
     // put your main code here, to run repeatedly:
-    if(Vout > 0.2 && old==1){
+    if(Vout > 1 && old==1){
       /*Serial.println("HIGH");*/
       digitalWrite(LED_PIN, LOW);
       Serial.write(sensor_number);
       Serial.write("0");
       old = 0;
     }
-    else if(Vout < 0.1 && old==0){
+    else if(Vout < 0.9 && old==0){
       /*Serial.println("LOW");*/
       digitalWrite(LED_PIN, HIGH);
       Serial.write(sensor_number);

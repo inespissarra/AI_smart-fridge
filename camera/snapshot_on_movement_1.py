@@ -18,8 +18,8 @@ import socket
 
 
 def connect_to_wifi():
-    SSID='NOS-FFFC'
-    KEY='MRZ2Q2NH'
+    SSID='iPhone de Inês (2)'
+    KEY='odiogoelindo'
 
     print ("Trying to connect. Note this may take a while...")
     wlan = network.WLAN(network.STA_IF)
@@ -27,10 +27,35 @@ def connect_to_wifi():
     wlan.active(True)
     wlan.connect(SSID, KEY)
 
+def detect_motion():
+    old = sensor.snapshot().save("temp/image.bmp")
+    diff = 5  # We'll say we detected motion after 10 frames of motion.
+
+    while diff:
+        img = sensor.snapshot()
+        img.difference("/temp/image.bmp")
+        stats = img.statistics()
+        if stats[5] > 50:
+            diff -= 1
+
+def wait_for_no_motion():
+    old = sensor.snapshot()
+
+    diff = 5
+    while diff:
+        img = sensor.snapshot()
+        img.difference(old)
+        stats = img.statistics()
+        if stats[5] < 100:
+            diff -= 1
+        else:
+            diff = 10
+            old = img
+
 
 def SendImage(img):
     s = socket.socket()
-    s.connect(("192.168.1.254", 8080))  # Replace with Raspberry Pi's IP address
+    s.connect(("172.20.10.7", 8080))  # Replace with Raspberry Pi's IP address
 
     # Convert image to JPEG
     img_compressed = img.compressed(quality=50)
@@ -58,28 +83,20 @@ if not "temp" in os.listdir():
     os.mkdir("temp")  # Make a temp directory
 
 while True:
-    print("About to save background image...")
     sensor.skip_frames(time=2000)  # Give the user time to get ready.
 
-    sensor.snapshot().save("temp/bg.bmp")
-    print("Saved background image - Now detecting motion!")
-
-    diff = 10  # We'll say we detected motion after 10 frames of motion.
-    while diff:
-        img = sensor.snapshot()
-        img.difference("temp/bg.bmp")
-        stats = img.statistics()
-        # Stats 5 is the max of the lighting color channel. The below code
-        # triggers when the lighting max for the whole image goes above 20.
-        # The lighting difference maximum should be zero normally.
-        if stats[5] > 20:
-            diff -= 1
+    print("waiting for motion")
+    detect_motion()
+    print("waiting for no motion")
+    wait_for_no_motion()
 
     led.on()
     print("Movement detected! Saving image...")
-    sensor.snapshot().save("temp/snapshot-%d.jpg" % random.getrandbits(32))  # Save Pic.
     img = sensor.snapshot()
-
     SendImage(img)
-
     led.off()
+
+    print("waiting for motion")
+    detect_motion()
+    print("waiting for no motion")
+    wait_for_no_motion()

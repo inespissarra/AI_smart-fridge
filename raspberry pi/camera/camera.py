@@ -16,7 +16,7 @@ import re
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Bind the socket to the address and port
-server_socket.bind(("192.168.1.254", 8080))  # Replace with Raspberry Pi's IP address
+server_socket.bind(("172.20.10.7", 8080))  # Replace with Raspberry Pi's IP address
 print("Server is running on port 8080")
 server_socket.listen(5)
 
@@ -120,12 +120,12 @@ def save_last_product(product, quantity, expiration_date):
         f.write(expiration_date + '\n')
         f.close()
 
-# while True:
-    #receive_image()
-    #print("Image received")
+while True:
+    receive_image()
+    print("Image received")
 
-product = recognize_image()
+    product = recognize_image()
 
-expiration_date = recognize_date()
+    expiration_date = recognize_date()
 
-save_last_product(product, "1", expiration_date)
+    save_last_product(product, "1", expiration_date)
