@@ -18,8 +18,80 @@ dbConn = mysql.connector.connect(
     database=DB_DATABASE
 )
 
+def insert_product(product, quantity, expiration_date, sensor_number):
+    # write to database
+        cursor = dbConn.cursor()
+        if expiration_date == "None":
+            query = ("INSERT INTO product (product_name, quantity, sensor) VALUES (%s, %s, %s)")
+            cursor.execute(query, (product, quantity, sensor_number))
+        else:
+            query = ("INSERT INTO product (product_name, quantity, expiration_date, sensor) VALUES (%s, %s, %s, %s)")
+            cursor.execute(query, (product, quantity, expiration_date, sensor_number))
+        dbConn.commit()
+        cursor.close()
+
+def insert_old_product(product):
+    cursor = dbConn.cursor()
+    query = ("INSERT INTO old_product (product_name) VALUES (%s)")
+    cursor.execute(query, (product,))
+    dbConn.commit()
+    cursor.close()
+
+def delete_old_product(product):
+    cursor = dbConn.cursor()
+    query = ("DELETE FROM old_product WHERE product_name = %s")
+    cursor.execute(query, (product,))
+    dbConn.commit()
+    cursor.close()
+
+def delete_product(sensor_number):
+    cursor = dbConn.cursor()
+    query = ("DELETE FROM product WHERE sensor = %s")
+    cursor.execute(query, (sensor_number,))
+    dbConn.commit()
+    cursor.close()
+
+def get_product_information(sensor_number):
+    cursor = dbConn.cursor()
+    query = ("SELECT product_name, quantity, expiration_date FROM product WHERE sensor = %s")
+    cursor.execute(query, (sensor_number,))
+    rows = cursor.fetchall()
+    cursor.close()
+    return (rows[0][0], rows[0][1], rows[0][2])
+
+def is_new_product(product):
+    cursor = dbConn.cursor()
+    query = ("SELECT * FROM old_product WHERE product_name = %s")
+    cursor.execute(query, (product,))
+    rows = cursor.fetchall()
+    cursor.close()
+    return len(rows) != 0
+
+def is_last_product(product):
+    cursor = dbConn.cursor()
+    query = ("SELECT * FROM product WHERE product_name = %s")
+    cursor.execute(query, (product,))
+    rows = cursor.fetchall()
+    cursor.close()
+    return len(rows) == 0
+
+def read_last_product():
+    with open('last_product.txt', 'r') as f:
+        product = f.readline().strip()
+        quantity = f.readline().strip()
+        expiration_date = f.readline().strip()
+        f.close()
+    return (product, quantity, expiration_date)
+
+def write_last_product(product, quantity, expiration_date):
+    with open('last_product.txt', 'w') as f:
+        f.write(product + '\n')
+        f.write(str(quantity) + '\n')
+        f.write(str(expiration_date) + '\n')
+        f.close()
+
 # ser = serial.Serial('/dev/ttyACM0', 9600, timeout=5)
-ser = serial.Serial('/dev/cu.usbmodem14101', 9600)
+ser = serial.Serial('/dev/cu.usbmodem142201', 9600)
 
 while 1:
         # read from Arduino
@@ -29,45 +101,24 @@ while 1:
         print ("Read input " + input + " from Arduino")
 
         if sensor_state == "1":
-            with open('last_product.txt', 'r') as f:
-                product = f.readline()
-                quantity = f.readline()
-                expiration_date = f.readline()
-                f.close()
-            # write to database
-            cursor = dbConn.cursor()
-            if expiration_date == "\n":
-                query = ("INSERT INTO product (product_name, quantity, sensor) VALUES (%s, %s, %s)")
-                cursor.execute(query, (product, quantity, sensor_number))
-            else:
-                query = ("INSERT INTO product (product_name, quantity, expiration_date, sensor) VALUES (%s, %s, %s, %s)")
-                cursor.execute(query, (product, quantity, expiration_date, sensor_number))
-            dbConn.commit()
-            cursor.close()
-        elif sensor_state == "0":
-            cursor = dbConn.cursor()
-            query = ("SELECT product_name, quantity, expiration_date FROM product WHERE sensor = %s")
-            cursor.execute(query, (sensor_number,))
-            rows = cursor.fetchall()
-            cursor.close()
+            product, quantity, expiration_date = read_last_product()
 
-            product_name = rows[0][0]
-            quantity = rows[0][1]
-            expiration_date = rows[0][2]
+            insert_product(product, quantity, expiration_date, sensor_number)
+            if is_new_product(product):
+                print("New product", product, "added")
+                delete_old_product(product)
+        elif sensor_state == "0":
+            product_name, quantity, expiration_date = get_product_information(sensor_number)
+
             print("There's {} of {}".format(quantity, product_name))
             print("Expiration date: {}".format(expiration_date))
 
-            # write to last_product.txt
-            with open('last_product.txt', 'w') as f:
-                f.write(product_name)
-                f.write(str(quantity) + '\n')
-                f.write(str(expiration_date) + '\n')
-                f.close()
+            write_last_product(product_name, quantity, expiration_date)
 
-            cursor = dbConn.cursor()
-            query = ("DELETE FROM product WHERE sensor = %s")
-            cursor.execute(query, (sensor_number,))
-            dbConn.commit()
-            cursor.close()
+            delete_product(sensor_number)
+
+            if is_last_product(product_name):
+                print("Last product", product_name, "removed")
+                insert_old_product(product_name)
         
 

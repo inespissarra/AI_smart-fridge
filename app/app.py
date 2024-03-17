@@ -18,6 +18,7 @@ DB_CONNECTION_STRING = "host=%s dbname=%s user=%s password=%s" % (DB_HOST, DB_DA
 
 # Query
 QUERY_SELECT_PRODUCTS = "SELECT product_name, quantity, expiration_date FROM product;"
+QUERY_SELECT_OLD_PRODUCTS = "SELECT product_name FROM old_product;"
 
 def get_products():
     products = {
@@ -55,6 +56,36 @@ def get_products():
         cursor.close()
         dbConn.close()
 
+def get_old_products():
+    old_products = {
+        "items": []
+    }
+    dbConn = None
+    cursor = None
+
+    try:
+        dbConn = mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_DATABASE
+        )
+        cursor = dbConn.cursor()
+
+        cursor.execute(QUERY_SELECT_OLD_PRODUCTS)
+        rows = cursor.fetchall()
+
+        old_products['items'] = [rows[i][0] for i in range(len(rows))]
+        
+        return old_products
+
+    except Exception as e:
+        print("error: " + str(e))
+
+    finally:
+        cursor.close()
+        dbConn.close()
+
 
 @app.route('/')
 def home():
@@ -64,7 +95,7 @@ def home():
 @app.route('/data')
 def fetch_data():
     products = get_products()
-    shopping_list = create_shopping_list(products)
+    shopping_list = create_shopping_list(products, get_old_products())
     notifications = fetch_notifications(products)
     return shopping_list, notifications
         
@@ -74,12 +105,19 @@ def fetch_fridge_data():
         "items": [],
         "quantities": []
     }
+
+    dict_products = {}
     
     products = get_products()
 
-    for i in range(len(products["items"])):    
-        fridge_data['items'] += [products["items"][i]]
-        fridge_data['quantities'] += [products["quantities"][i]]
+    for i in range(len(products["items"])):
+        if products["items"][i] not in dict_products:
+            dict_products[products["items"][i]] = products["quantities"][i]
+        else:
+            dict_products[products["items"][i]] += products["quantities"][i]
+    
+    fridge_data['items'] = list(dict_products.keys())
+    fridge_data['quantities'] = list(dict_products.values())
         
     return jsonify(fridge_data)
 
@@ -97,17 +135,17 @@ def fetch_notifications(products):
         expiration_date = products["expiration_dates"][i]
         
         product_date = expiration_date
-        current_date = datetime.now().date()
-
-        if product_date > current_date:
-            notifications['expiration_dates'] += [product_date]
-            notifications['messages'] += ["{} {} is expired".format(quantity, product_name)]
-            print("{} {} is expired".format(quantity, product_name))
-            
-        elif current_date - product_date <= timedelta(days=2):
-            notifications['expiration_date'] += [product_date]
-            notifications['message'] += ["{} {} is about to expire".format(quantity, product_name)]
-            print("{} {} is expired".format(quantity, product_name))
+        if product_date!=None:
+            current_date = datetime.now().date()
+            if current_date < product_date:
+                notifications['expiration_dates'] += [product_date]
+                notifications['messages'] += ["{} {} is expired".format(quantity, product_name)]
+                print("{} {} is expired".format(quantity, product_name))
+                
+            elif current_date - product_date <= timedelta(days=2):
+                notifications['expiration_date'] += [product_date]
+                notifications['message'] += ["{} {} is about to expire".format(quantity, product_name)]
+                print("{} {} is expired".format(quantity, product_name))
             
     return notifications
 
@@ -126,20 +164,26 @@ def send_email(subject, message):
        smtp_server.sendmail(sender_email, recipient_email, msg.as_string())
     print("Message sent!")
     
-def create_shopping_list(products):
-    shopping_list = []
+def create_shopping_list(products, old_products):
+    dict_products = {}
     for i in range(len(products["items"])):
-        product_name = products["items"][i]
-        quantity = products["quantities"][i]
-        
-        if quantity < 2:
-            shopping_list += [product_name]
+        if products["items"][i] not in dict_products:
+            dict_products[products["items"][i]] = products["quantities"][i]
+        else:
+            dict_products[products["items"][i]] += products["quantities"][i]
+            
+    shopping_list = []
+    for key in dict_products:
+        if dict_products[key] < 2:
+            shopping_list += [key]
+
+    shopping_list += old_products["items"]
     
     return shopping_list
 
 @app.route('/send_shopping_list')
 def send_shopping_list():
-    shopping_list = create_shopping_list(products=get_products())
+    shopping_list = create_shopping_list(products=get_products(), old_products=get_old_products())
     subject = "Shopping List"
     message = ""
     for item in shopping_list:

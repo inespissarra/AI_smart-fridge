@@ -10,16 +10,16 @@
 # motion detection. After motion is detected your OpenMV Cam will take picture.
 
 import sensor
-import random
 import os
 import machine
 import network
 import socket
+import time
 
 
 def connect_to_wifi():
-    SSID='iPhone de Inês (2)'
-    KEY='odiogoelindo'
+    SSID='NOS-FFFC'
+    KEY='MRZ2Q2NH'
 
     print ("Trying to connect. Note this may take a while...")
     wlan = network.WLAN(network.STA_IF)
@@ -28,43 +28,29 @@ def connect_to_wifi():
     wlan.connect(SSID, KEY)
 
 def detect_motion():
-    old = sensor.snapshot().save("temp/image.bmp")
-    diff = 5  # We'll say we detected motion after 10 frames of motion.
+    sensor.snapshot().save("temp/bg.bmp")
+    diff = 20  # We'll say we detected motion after 10 frames of motion.
 
     while diff:
         img = sensor.snapshot()
-        img.difference("/temp/image.bmp")
+        img.difference("temp/bg.bmp")
         stats = img.statistics()
-        if stats[5] > 50:
+        if stats[5] > 30:
             diff -= 1
-
-def wait_for_no_motion():
-    old = sensor.snapshot()
-
-    diff = 5
-    while diff:
-        img = sensor.snapshot()
-        img.difference(old)
-        stats = img.statistics()
-        if stats[5] < 100:
-            diff -= 1
-        else:
-            diff = 10
-            old = img
 
 
 def SendImage(img):
     s = socket.socket()
-    s.connect(("172.20.10.7", 8080))  # Replace with Raspberry Pi's IP address
+    s.connect(("192.168.1.12", 8080))  # Replace with Raspberry Pi's IP address
 
     # Convert image to JPEG
-    img_compressed = img.compressed(quality=50)
+    img = img.compressed(quality=100)
 
     # Send image size
-    s.send(str(len(img_compressed)))
+    s.sendall(len(img).to_bytes(4, 'big'))
 
     # Send image data
-    s.send(img_compressed)
+    s.sendall(img)
 
     # Close the socket
     s.close()
@@ -78,25 +64,33 @@ sensor.skip_frames(time=2000)  # Wait for settings take effect.
 sensor.set_auto_whitebal(False)  # Turn off white balance.
 
 led = machine.LED("LED_RED")
+led2 = machine.LED("LED_GREEN")
+led3 = machine.LED("LED_BLUE")
 
 if not "temp" in os.listdir():
     os.mkdir("temp")  # Make a temp directory
+
+sensor.snapshot().save("temp/bg.bmp")
 
 while True:
     sensor.skip_frames(time=2000)  # Give the user time to get ready.
 
     print("waiting for motion")
+    led2.on()
     detect_motion()
-    print("waiting for no motion")
-    wait_for_no_motion()
+    print("motion detected")
+    led2.off()
+    time.sleep(3)
 
     led.on()
     print("Movement detected! Saving image...")
     img = sensor.snapshot()
     SendImage(img)
+    img.save("temp/snapshot.jpg")
     led.off()
 
     print("waiting for motion")
+    led3.on()
     detect_motion()
-    print("waiting for no motion")
-    wait_for_no_motion()
+    led3.off()
+    time.sleep(3)

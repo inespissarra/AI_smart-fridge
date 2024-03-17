@@ -1,5 +1,6 @@
 # receive image
 import socket
+import cv2
 
 # predict image
 import numpy as np
@@ -9,14 +10,13 @@ from tensorflow.keras.models import load_model
 # recognize date
 import pytesseract
 from PIL import Image
-import cv2
 import re
 
 # Create a TCP/IP socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Bind the socket to the address and port
-server_socket.bind(("172.20.10.7", 8080))  # Replace with Raspberry Pi's IP address
+server_socket.bind(("192.168.1.12", 8080))  # Replace with Raspberry Pi's IP address
 print("Server is running on port 8080")
 server_socket.listen(5)
 
@@ -31,6 +31,8 @@ def receive_image():
         if not chunk:
             break
         img_size_bytes += chunk
+
+    print(img_size_bytes)
 
     # Convert image size bytes to integer
     img_size = int.from_bytes(img_size_bytes, byteorder='big')
@@ -75,7 +77,7 @@ def recognize_image():
     train_datagen = ImageDataGenerator(rescale=1./255)
     train_generator = train_datagen.flow_from_directory(
         "./dataset",
-        target_size=(320, 240),
+        target_size=(504, 378),
         batch_size=32,
         class_mode='categorical')
 
@@ -85,11 +87,11 @@ def recognize_image():
     # predict the image
     image_path = './received_image.jpg'
 
-    prediction = predict_image(model, image_path, 320, 240)
+    prediction = predict_image(model, image_path, 504, 378)
     class_label = get_class_label(prediction, class_indices)
 
     print(f'A imagem {image_path} é da classe {class_label} com probabilidade {np.max(prediction) * 100 :.2f}')
-    if np.max(prediction) > 0.7:
+    if np.max(prediction) > 0.5:
         print("Produto reconhecido")
     else:
         print("Produto não reconhecido")
@@ -110,8 +112,11 @@ def recognize_date():
     for i in result:
         if re.match(padrao_data, i):
             print(i)
-            return i
-    return "Undetectable"
+            day = i.split('/')[0]
+            month = i.split('/')[1]
+            year = i.split('/')[2]
+            return f"{year}-{month}-{day}"
+    return "None"
     
 def save_last_product(product, quantity, expiration_date):
     with open('../last_product.txt', 'w') as f:
@@ -120,12 +125,24 @@ def save_last_product(product, quantity, expiration_date):
         f.write(expiration_date + '\n')
         f.close()
 
+def resize_image():
+    img_array = cv2.imread('received_image.jpg')
+    img_array = cv2.resize(img_array, (504, 378))
+    cv2.imwrite('received_image.jpg', img_array)
+
 while True:
     receive_image()
     print("Image received")
+
+    resize_image()
 
     product = recognize_image()
 
     expiration_date = recognize_date()
 
-    save_last_product(product, "1", expiration_date)
+    if product == "eggs" or product == "yogurt":
+        quantity = "6"
+    else:
+        quantity = "1"
+
+    save_last_product(product, quantity, expiration_date)
