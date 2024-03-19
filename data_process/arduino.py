@@ -3,6 +3,9 @@
 import serial
 import mysql.connector
 
+# ser = serial.Serial('/dev/ttyACM0', 9600) # For Raspberry Pi
+ser = serial.Serial('/dev/cu.usbmodem142201', 9600)
+
 # SGBD configs
 DB_HOST="localhost"
 DB_USER="root"
@@ -89,9 +92,6 @@ def write_last_product(product, quantity, expiration_date):
         f.write(str(quantity) + '\n')
         f.write(str(expiration_date) + '\n')
         f.close()
-
-# ser = serial.Serial('/dev/ttyACM0', 9600, timeout=5)
-ser = serial.Serial('/dev/cu.usbmodem142201', 9600)
 
 while 1:
         # read from Arduino

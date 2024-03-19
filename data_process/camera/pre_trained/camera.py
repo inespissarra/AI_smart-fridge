@@ -28,7 +28,7 @@ server_socket.listen(5)
 # ------------- Load the machine learning model-------------
 
 model = torchvision.models.detection.fasterrcnn_resnet50_fpn(num_classes=3, weights=None)
-model.load_state_dict(torch.load('faster_rcnn_model2.pth', map_location=torch.device('cpu')))
+model.load_state_dict(torch.load('faster_rcnn_model.pth', map_location=torch.device('cpu')))
 model.eval()
 
 # predict the image
