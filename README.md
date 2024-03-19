@@ -53,12 +53,14 @@ To make this code the default when the camera is connected to the energy click `
 
 The camera has to be connected to the energy using a USB-Micro USB cable. The light turns green if the camera is connected correctly as this indicates it is ready to capture a picture. When the camera is taking the picture, the light turns red. Finally, when the product is ready to be removed, the light turns blue. The picture is sent to the system by Wi-Fi.
 
-To run the code that processes the camera data (in the computer), go to `data_process/camera` and run `camera.py`, with the following commands:
+To run the code that processes the camera data (in the computer), go to `data_process/camera/_model_` ( __model_ _ must be replaced by `new_model` or `pre_trained`) and run `camera.py` with the following commands:
 
 ```sh
-cd data_process/camera
+cd data_process/camera/_model_
 python3 camera.py
 ```
+
+The correspondent databases and models must be in the same folder as the `camera.py` code.
 
 ### Arduino
 
