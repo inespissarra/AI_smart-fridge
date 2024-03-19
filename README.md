@@ -60,7 +60,7 @@ cd data_process/camera/_model_
 python3 camera.py
 ```
 
-The correspondent databases and models must be in the same folder as the `camera.py` code.
+The correspondent models must be in the same folder as the `camera.py` code.
 
 ### Arduino
 
