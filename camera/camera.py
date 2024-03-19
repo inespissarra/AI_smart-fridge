@@ -16,11 +16,12 @@ import network
 import socket
 import time
 
+SSID='NOS-FFFC'
+KEY='MRZ2Q2NH'
+
+IP = "192.168.1.12"
 
 def connect_to_wifi():
-    SSID='NOS-FFFC'
-    KEY='MRZ2Q2NH'
-
     print ("Trying to connect. Note this may take a while...")
     wlan = network.WLAN(network.STA_IF)
     wlan.deinit()
@@ -41,7 +42,7 @@ def detect_motion():
 
 def SendImage(img):
     s = socket.socket()
-    s.connect(("192.168.1.12", 8080))  # Replace with Raspberry Pi's IP address
+    s.connect((IP, 8080))  # Replace with Raspberry Pi's IP address
 
     # Convert image to JPEG
     img = img.compressed(quality=100)
