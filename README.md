@@ -60,7 +60,7 @@ sudo apt-get install mysql-server
 
 PyTorch:
 ```
-pip install torch torchvision torchaudio
+pip install torch torchvision
 ```
 
 Pytesseract:
@@ -185,6 +185,25 @@ If an item is taken out and then promptly placed back in the fridge, it does not
 If you want to put multiple identical products, just scan the first one. And when a sensors that detects a produt will assume that the same product is being put in the fridge.
 
 ## Additional Information
+
+### Remaining Folders
+
+The `object_recognition` folder contains the code to create the machine learning models that recognize the products. 
+There are two models:
+- The new model, trained from scratch with the products that we want to recognize;
+- The pre-trained model, that was adapted (fine-tuned) to recognize our specific products.
+
+Unfortunately, the resulting models and the datasets are too big to be uploaded here.
+
+The new model dataset and model can be found [here](https://drive.google.com/drive/folders/1BwTqUBPTOYiVevAY4tJy5jK9-yekGmWB?usp=drive_link).
+
+The pre-trained model dataset and model can be found [here](https://drive.google.com/drive/folders/15AGG313OgU8PVDHnomRwuMnfar2_iWbs?usp=drive_link)
+
+To train the machine learning models, the usage of Google Colab is recommended, as it has a GPU that speeds up the process. To change the runtime to GPU, go to `Runtime > Change runtime type` and select `T4 GPU`. 
+The dataset (in a zip file) should be uploaded to the drive. 
+In the case of the new model, the dataset should be a folder with one folder for each class and the images of the products inside the respective class folder.
+In the case of the pre-trained model, the dataset should be a folder with a COCO JSON file and the respective images. An easy way to create this dataset is to use the `RectLabel` tool.
+The number of classes (usually `num_classes`) should be adapted.
 
 ### Authors
 
