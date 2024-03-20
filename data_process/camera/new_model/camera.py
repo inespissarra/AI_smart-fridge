@@ -109,8 +109,6 @@ def recognize_date():
 
     result = pytesseract.image_to_string(image)
 
-    print(result)
-
     # filter date
     result = result.split(' ')
     for i in result:
@@ -145,9 +143,6 @@ while True:
 
     expiration_date = recognize_date()
     
-    if product == "eggs":
-        quantity = "6"
-    else:
-        quantity = "1"
+    quantity = "1"
 
     save_last_product(product, quantity, expiration_date)

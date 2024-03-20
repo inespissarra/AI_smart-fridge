@@ -153,9 +153,6 @@ while True:
 
     expiration_date = recognize_date()
     
-    if product == "eggs":
-        quantity = "6"
-    else:
-        quantity = "1"
+    quantity = "1"
 
     save_last_product(product, quantity, expiration_date)
