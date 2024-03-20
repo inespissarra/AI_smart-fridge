@@ -94,12 +94,12 @@ def recognize_image():
     prediction = predict_image(model, image_path, 504, 378)
     class_label = get_class_label(prediction, class_indices)
 
-    print(f'A imagem {image_path} é da classe {class_label} com probabilidade {np.max(prediction) * 100 :.2f}')
+    print(f'The image {image_path} is classified as {class_label} with probability {np.max(prediction) * 100 :.2f}')
     if np.max(prediction) > 0.8:
-        print("Produto reconhecido")
+        print("Product recognized")
     else:
-        print("Produto não reconhecido")
-        class_label = "Desconhecido"
+        print("Product not recognized")
+        class_label = "Unknown"
     return class_label
 
 def recognize_date():
