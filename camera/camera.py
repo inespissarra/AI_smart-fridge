@@ -16,8 +16,8 @@ import network
 import socket
 import time
 
-SSID='NOS-FFFC'
-KEY='MRZ2Q2NH'
+SSID='NOS-SACC'
+KEY='RFYHBJNK'
 
 IP = "192.168.1.12"
 
