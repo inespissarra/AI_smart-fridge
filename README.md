@@ -25,6 +25,7 @@ It was used the following text platforms to program our smart fridge:
 - OpenMV IDE - to program the Camera
 - Arduino IDE - to program the Arduino
 - Visual Studio Code - to program the remaining code
+- RectLabel - to create the dataset for the machine learning models
 - Google Colab - to train the machine learning models
 
 ## Setup
@@ -120,7 +121,7 @@ The pre-trained model dataset and model can be found [here](https://drive.google
 To train the machine learning models, the usage of Google Colab is recommended, as it has a GPU that speeds up the process. To change the runtime to GPU, go to `Runtime > Change runtime type` and select `T4 GPU`. 
 The dataset (in a zip file) should be uploaded to the drive. 
 In the case of the new model, the dataset should be a folder with one folder for each class and the images of the products inside the respective class folder.
-In the case of the pre-trained model, the dataset should be a folder with a COCO JSON file and the respective images.
+In the case of the pre-trained model, the dataset should be a folder with a COCO JSON file and the respective images. An easy way to create this dataset is to use the `RectLabel` tool.
 The number of classes (usually `num_classes`) should be adapted.
 
 
@@ -135,6 +136,7 @@ The number of classes (usually `num_classes`) should be adapted.
 - [OpenMV IDE](https://openmv.io/pages/download?gad_source=1&gclid=CjwKCAjw7-SvBhB6EiwAwYdCAdFi9kPw_PdA8yJYGA-OzIwjfuq-NtvnOjP9ont1bPy2H4JPX77EaRoCROcQAvD_BwE)
 - [Arduino IDE](https://www.arduino.cc/en/software)
 - [Visual Studio Code](https://code.visualstudio.com/)
+- [RectLabel](https://rectlabel.com/)
 - [Google Colab](https://colab.research.google.com/)
 
 ----

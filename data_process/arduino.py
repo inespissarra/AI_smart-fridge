@@ -2,9 +2,7 @@
 
 import serial
 import mysql.connector
-
-# ser = serial.Serial('/dev/ttyACM0', 9600) # For Raspberry Pi
-ser = serial.Serial('/dev/cu.usbmodem142201', 9600)
+import os
 
 # SGBD configs
 DB_HOST="localhost"
@@ -13,6 +11,9 @@ DB_DATABASE="CHIP_FRIDGE"
 DB_PORT = 3306
 DB_PASSWORD=""
 DB_CONNECTION_STRING = "host=%s dbname=%s user=%s password=%s" % (DB_HOST, DB_DATABASE, DB_USER, DB_PASSWORD)
+
+# ser = serial.Serial('/dev/ttyACM0', 9600, timeout=5)
+ser = serial.Serial('/dev/cu.usbmodem141301', 9600)
 
 dbConn = mysql.connector.connect(
     host=DB_HOST,
@@ -83,14 +84,16 @@ def read_last_product():
         product = f.readline().strip()
         quantity = f.readline().strip()
         expiration_date = f.readline().strip()
+        new = f.readline().strip()
         f.close()
-    return (product, quantity, expiration_date)
+    return (product, quantity, expiration_date, new)
 
-def write_last_product(product, quantity, expiration_date):
+def write_last_product(product, quantity, expiration_date, new):
     with open('last_product.txt', 'w') as f:
         f.write(product + '\n')
         f.write(str(quantity) + '\n')
         f.write(str(expiration_date) + '\n')
+        f.write(new + '\n')
         f.close()
 
 while 1:
@@ -101,19 +104,24 @@ while 1:
         print ("Read input " + input + " from Arduino")
 
         if sensor_state == "1":
-            product, quantity, expiration_date = read_last_product()
-
-            insert_product(product, quantity, expiration_date, sensor_number)
-            if is_new_product(product):
-                print("New product", product, "added")
-                delete_old_product(product)
+            product, quantity, expiration_date, new = read_last_product()
+            if product != "":
+                insert_product(product, quantity, expiration_date, sensor_number)
+                if is_new_product(product):
+                    print("New product", product, "added")
+                    delete_old_product(product)
+                if new == "0":
+                    # remove the product
+                    write_last_product("", 0, "", "")
+            else :
+                print("No product to add")
         elif sensor_state == "0":
             product_name, quantity, expiration_date = get_product_information(sensor_number)
 
             print("There's {} of {}".format(quantity, product_name))
             print("Expiration date: {}".format(expiration_date))
 
-            write_last_product(product_name, quantity, expiration_date)
+            write_last_product(product_name, quantity, expiration_date, "0")
 
             delete_product(sensor_number)
 

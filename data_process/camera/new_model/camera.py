@@ -127,6 +127,7 @@ def save_last_product(product, quantity, expiration_date):
         f.write(product + '\n')
         f.write(quantity + '\n')
         f.write(expiration_date + '\n')
+        f.write("1\n")
         f.close()
 
 def resize_image():

@@ -20,7 +20,7 @@ import re
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Bind the socket to the address and port
-server_socket.bind(("192.168.1.5", 8080))  # Replace with Raspberry Pi's IP address
+server_socket.bind(("192.168.1.18", 8080))  # Replace with Raspberry Pi's IP address
 print("Server is running on port 8080")
 server_socket.listen(5)
 #-----------------------------------------------------------
@@ -135,6 +135,7 @@ def save_last_product(product, quantity, expiration_date):
         f.write(product + '\n')
         f.write(quantity + '\n')
         f.write(expiration_date + '\n')
+        f.write("1\n")
         f.close()
 
 def resize_image():
