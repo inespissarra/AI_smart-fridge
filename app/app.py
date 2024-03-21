@@ -20,6 +20,11 @@ DB_CONNECTION_STRING = "host=%s dbname=%s user=%s password=%s" % (DB_HOST, DB_DA
 QUERY_SELECT_PRODUCTS = "SELECT product_name, quantity, expiration_date FROM product;"
 QUERY_SELECT_OLD_PRODUCTS = "SELECT product_name FROM old_product;"
 
+FRIDGE_EMAIL = "chipthefridge@gmail.com"
+EMAIL_PASSWORD = "lyuv pgnu wboz ewzj"
+
+receiver_email = ''
+
 def get_products():
     products = {
         "items": [],
@@ -151,17 +156,13 @@ def fetch_notifications(products):
 
 def send_email(subject, message):
     # Email credentials
-    sender_email = "chipthefridge@gmail.com"
-    sender_password = "lyuv pgnu wboz ewzj"
-    recipient_email = "anainesanxv@gmail.com"
-        
     msg = MIMEText(message)
     msg['Subject'] = subject
-    msg['From'] = sender_email
-    msg['To'] = ', '.join(recipient_email)
+    msg['From'] = FRIDGE_EMAIL
+    msg['To'] = receiver_email
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
-       smtp_server.login(sender_email, sender_password)
-       smtp_server.sendmail(sender_email, recipient_email, msg.as_string())
+       smtp_server.login(FRIDGE_EMAIL, EMAIL_PASSWORD)
+       smtp_server.sendmail(FRIDGE_EMAIL, receiver_email, msg.as_string())
     print("Message sent!")
     
 def create_shopping_list(products, old_products):
@@ -193,4 +194,6 @@ def send_shopping_list():
     return jsonify({'message': 'Shopping List sent successfully!'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # request email
+    receiver_email = input("Please enter your email address: ")
+    app.run(debug=False)

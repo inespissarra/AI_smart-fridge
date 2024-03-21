@@ -35,11 +35,12 @@ def insert_product(product, quantity, expiration_date, sensor_number):
         cursor.close()
 
 def insert_old_product(product):
-    cursor = dbConn.cursor()
-    query = ("INSERT INTO old_product (product_name) VALUES (%s)")
-    cursor.execute(query, (product,))
-    dbConn.commit()
-    cursor.close()
+    if product != "unknown":
+        cursor = dbConn.cursor()
+        query = ("INSERT INTO old_product (product_name) VALUES (%s)")
+        cursor.execute(query, (product,))
+        dbConn.commit()
+        cursor.close()
 
 def delete_old_product(product):
     cursor = dbConn.cursor()
@@ -105,16 +106,13 @@ while 1:
 
         if sensor_state == "1":
             product, quantity, expiration_date, new = read_last_product()
-            if product != "":
-                insert_product(product, quantity, expiration_date, sensor_number)
-                if is_new_product(product):
-                    print("New product", product, "added")
-                    delete_old_product(product)
-                if new == "0":
-                    # remove the product
-                    write_last_product("", 0, "", "")
-            else :
-                print("No product to add")
+            insert_product(product, quantity, expiration_date, sensor_number)
+            if is_new_product(product):
+                print("New product", product, "added")
+                delete_old_product(product)
+            if new == "0":
+                # remove the product
+                write_last_product("unknown", 1, "None", "1")
         elif sensor_state == "0":
             product_name, quantity, expiration_date = get_product_information(sensor_number)
 
