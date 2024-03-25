@@ -99,7 +99,7 @@ def recognize_image():
         print("Product recognized")
     else:
         print("Product not recognized")
-        class_label = "Unknown"
+        class_label = "unknown"
     return class_label
 
 def recognize_date():
