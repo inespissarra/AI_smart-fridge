@@ -175,7 +175,7 @@ def create_shopping_list(products, old_products):
             
     shopping_list = []
     for key in dict_products:
-        if dict_products[key] < 2:
+        if dict_products[key] < 2 and key != "unknown":
             shopping_list += [key]
 
     shopping_list += old_products["items"]
