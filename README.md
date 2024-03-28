@@ -1,4 +1,6 @@
-# A02 CHIP The Fridge Project
+# CHIP The Fridge
+
+Ambient Intelligence Project (MEIC-A, Instituto Superior Técnico, 2023/2024)
 
 CHIP The Fridge is a smart fridge that helps users to manage their food. It has a camera that scans the products before they are stored in the fridge. The camera sends the image to a system that processes the data and stores it in a database. The system also receives data from an Arduino that informs the system when a product is added or removed from the fridge. The system has a web app that allows users to see the products in the fridge and their expiration dates. The system also allows the user to send the shopping list to the user's email.
 
