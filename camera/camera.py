@@ -16,10 +16,8 @@ import network
 import socket
 import time
 
-SSID='NOS-SACC'
-KEY='RFYHBJNK'
 
-IP = "192.168.1.12"
+IP = "192.168.43.253"
 
 def connect_to_wifi():
     print ("Trying to connect. Note this may take a while...")
@@ -36,7 +34,7 @@ def detect_motion():
         img = sensor.snapshot()
         img.difference("temp/bg.bmp")
         stats = img.statistics()
-        if stats[5] > 30:
+        if stats[5] > 50:
             diff -= 1
 
 
@@ -94,4 +92,4 @@ while True:
     led3.on()
     detect_motion()
     led3.off()
-    time.sleep(3)
+    time.sleep(5)

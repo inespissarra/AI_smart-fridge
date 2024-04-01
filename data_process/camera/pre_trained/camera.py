@@ -20,7 +20,7 @@ import re
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Bind the socket to the address and port
-server_socket.bind(("192.168.1.18", 8080))  # Replace with Raspberry Pi's IP address
+server_socket.bind(("192.168.43.253", 8080))  # Replace with Raspberry Pi's IP address
 print("Server is running on port 8080")
 server_socket.listen(5)
 #-----------------------------------------------------------
@@ -103,11 +103,11 @@ def recognize_image():
     class_label, max_score = predict_image(model, img)
 
     print(f'The image {image_path} is classified as {class_label} with probability {max_score * 100 :.2f}')
-    if max_score > 0.8:
+    if max_score > 0.5:
         print("Product recognized")
     else:
         print("Product not recognized")
-        class_label = "Unknown"
+        class_label = "unknown"
     return class_label
 
 def recognize_date():
